@@ -38,4 +38,10 @@ Wykres słupkowy pokazuje różnicę momentum w oknach 5-minutowych, a wykres li
 pip install -r requirements.txt
 ```
 
-Notebooki znajdują się w katalogu `notebooks/`.
+Głównym miejscem pracy jest notebook:
+
+```text
+notebooks/00_glowny_notebook.ipynb
+```
+
+Ten notebook sam dodaje `src/` do ścieżki Pythona, więc można go uruchamiać bez instalowania projektu jako pakietu. Pozostałe notebooki w katalogu `notebooks/` są starszą/eksploracyjną wersją analizy.
