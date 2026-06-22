@@ -11,7 +11,7 @@ from .momentum import (
 
 
 HOME_COLOR = "#2f80ed"
-AWAY_COLOR = "#eb5757"
+AWAY_COLOR = "#37e119"
 
 
 def _step_values(timeline, team, value_col, max_minute):
