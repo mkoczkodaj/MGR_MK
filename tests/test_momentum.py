@@ -6,6 +6,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from mgr_mk.data_loader import load_events, load_world_cup_2018_matches
+from mgr_mk.datasets import build_player_match_dataset
 from mgr_mk.momentum import build_match_momentum, goal_events
 
 
@@ -20,3 +21,14 @@ def test_brazil_belgium_detects_all_goals():
 
     assert len(goals) == 3
     assert goals["team.name"].tolist() == ["Belgium", "Belgium", "Brazil"]
+
+
+def test_player_match_dataset_contains_match_context():
+    matches = load_world_cup_2018_matches()
+    dataset = build_player_match_dataset(matches, match_ids=[8650])
+
+    assert not dataset.empty
+    assert dataset["match_id"].nunique() == 1
+    assert {"opponent", "result", "team_momentum", "team_xg"}.issubset(dataset.columns)
+    assert dataset["opponent"].notna().all()
+    assert dataset["result"].isin(["win", "draw", "loss"]).all()
