@@ -6,5 +6,3 @@ Notebooki zostają jako warstwa eksploracyjna projektu.
 - `main.ipynb` - dotychczasowa analiza w formie notebooka.
 - `00_glowny_notebook.ipynb` - główne miejsce pracy z wykresami dla wybranego meczu.
 - `01_dataset_wszyscy_zawodnicy.ipynb` - budowa datasetu zawodnik-mecz dla wszystkich meczów.
-
-Nową logikę warto dopisywać przede wszystkim w `src/mgr_mk/`, a w notebookach tylko importować funkcje i prezentować wyniki.

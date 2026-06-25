@@ -16,7 +16,7 @@ MGR_MK/
 - `src/mgr_mk/data_loader.py` - ładowanie meczów, eventów i składów.
 - `src/mgr_mk/features.py` - cechy zawodników per 90 minut.
 - `src/mgr_mk/datasets.py` - dataset zawodnik-mecz dla całego turnieju.
-- `src/mgr_mk/momentum.py` - autorski wskaźnik match momentum.
+- `src/mgr_mk/momentum.py` - wskaźnik match momentum.
 - `src/mgr_mk/plots.py` - wykresy momentum i skumulowanego xG.
 
 ## Momentum
