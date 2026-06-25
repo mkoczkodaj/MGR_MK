@@ -118,6 +118,64 @@ def cumulative_momentum(momentum_events: pd.DataFrame) -> pd.DataFrame:
     return timeline
 
 
+def player_momentum_contributions(momentum_events: pd.DataFrame) -> pd.DataFrame:
+    player_events = momentum_events[
+        momentum_events["momentum_score"].gt(0)
+        & momentum_events["player.name"].notna()
+    ].copy()
+
+    if player_events.empty:
+        return pd.DataFrame(
+            columns=[
+                "team.name",
+                "player.name",
+                "player_momentum",
+                "momentum_events",
+            ]
+        )
+
+    return (
+        player_events.groupby(["team.name", "player.name"], as_index=False)
+        .agg(
+            player_momentum=("momentum_score", "sum"),
+            momentum_events=("momentum_score", "count"),
+        )
+        .sort_values("player_momentum", ascending=False)
+        .reset_index(drop=True)
+    )
+
+
+def player_momentum_by_window(momentum_events: pd.DataFrame) -> pd.DataFrame:
+    player_events = momentum_events[
+        momentum_events["momentum_score"].gt(0)
+        & momentum_events["player.name"].notna()
+    ].copy()
+
+    if player_events.empty:
+        return pd.DataFrame(
+            columns=[
+                "time_bin",
+                "team.name",
+                "player.name",
+                "player_momentum",
+            ]
+        )
+
+    return (
+        player_events.groupby(
+            ["time_bin", "team.name", "player.name"],
+            as_index=False,
+        )["momentum_score"]
+        .sum()
+        .rename(columns={"momentum_score": "player_momentum"})
+        .sort_values(
+            ["time_bin", "team.name", "player_momentum"],
+            ascending=[True, True, False],
+        )
+        .reset_index(drop=True)
+    )
+
+
 def cumulative_xg(events: pd.DataFrame) -> pd.DataFrame:
     xg_events = events.copy()
     xg_events["match_minute"] = (
@@ -132,4 +190,3 @@ def cumulative_xg(events: pd.DataFrame) -> pd.DataFrame:
     )
     timeline["cum_xg"] = timeline.groupby("team.name")["shot_xg"].cumsum()
     return timeline
-

@@ -7,6 +7,7 @@ from .momentum import (
     cumulative_momentum,
     cumulative_xg,
     goal_events,
+    player_momentum_by_window,
 )
 
 
@@ -24,7 +25,14 @@ def _step_values(timeline, team, value_col, max_minute):
     return x_values, y_values
 
 
-def plot_match_momentum(events, matches, match_id, window=5):
+def plot_match_momentum(
+    events,
+    matches,
+    match_id,
+    window=5,
+    annotate_players=True,
+    max_player_labels=10,
+):
     match_info = matches.loc[matches["match_id"].eq(match_id)].iloc[0]
     momentum_table, teams, momentum_events = build_match_momentum(
         events, match_info, window=window
@@ -57,6 +65,15 @@ def plot_match_momentum(events, matches, match_id, window=5):
         f"Match momentum: {home_team} {home_score} - {away_score} {away_team}"
     )
     axes[0].grid(axis="y", alpha=0.25)
+    if annotate_players:
+        _annotate_momentum_players(
+            axes[0],
+            momentum_table,
+            momentum_events,
+            teams,
+            window=window,
+            max_labels=max_player_labels,
+        )
 
     timeline = cumulative_momentum(momentum_events)
     for team, color in [(home_team, HOME_COLOR), (away_team, AWAY_COLOR)]:
@@ -79,6 +96,76 @@ def plot_match_momentum(events, matches, match_id, window=5):
 
     plt.tight_layout()
     return fig, momentum_table
+
+
+def _short_player_name(player_name):
+    parts = str(player_name).split()
+    if len(parts) <= 1:
+        return str(player_name)
+    return parts[-1]
+
+
+def _top_player_for_bar(player_windows, time_bin, team):
+    candidates = player_windows[
+        player_windows["time_bin"].eq(time_bin)
+        & player_windows["team.name"].eq(team)
+    ]
+    if candidates.empty:
+        return None
+    return candidates.iloc[0]
+
+
+def _annotate_momentum_players(
+    ax,
+    momentum_table,
+    momentum_events,
+    teams,
+    window,
+    max_labels,
+):
+    player_windows = player_momentum_by_window(momentum_events)
+    if player_windows.empty:
+        return
+
+    home_team, away_team = teams
+    label_candidates = momentum_table.copy()
+    label_candidates["abs_momentum_diff"] = label_candidates["momentum_diff"].abs()
+    label_candidates = label_candidates[label_candidates["abs_momentum_diff"].gt(0)]
+    label_candidates = label_candidates.sort_values(
+        "abs_momentum_diff",
+        ascending=False,
+    ).head(max_labels)
+
+    top = ax.get_ylim()[1]
+    bottom = ax.get_ylim()[0]
+    y_padding = (top - bottom) * 0.035
+
+    for time_bin, row in label_candidates.iterrows():
+        dominant_team = home_team if row["momentum_diff"] >= 0 else away_team
+        player_row = _top_player_for_bar(player_windows, time_bin, dominant_team)
+        if player_row is None:
+            continue
+
+        x = time_bin + window / 2
+        y = row["momentum_diff"]
+        va = "bottom" if y >= 0 else "top"
+        y_text = y + y_padding if y >= 0 else y - y_padding
+        ax.text(
+            x,
+            y_text,
+            _short_player_name(player_row["player.name"]),
+            ha="center",
+            va=va,
+            fontsize=8,
+            rotation=90,
+            color="#222222",
+            bbox={
+                "boxstyle": "round,pad=0.2",
+                "facecolor": "white",
+                "edgecolor": "#d5d9e0",
+                "alpha": 0.85,
+            },
+        )
 
 
 def plot_cumulative_xg(events, matches, match_id, window=5):
@@ -138,4 +225,3 @@ def _draw_goal_markers(axes, goals, home_team):
                 fontsize=9,
                 fontweight="bold",
             )
-
