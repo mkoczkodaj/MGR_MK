@@ -9,12 +9,6 @@ from .momentum import build_match_momentum, player_momentum_contributions
 
 @dataclass(frozen=True)
 class MVPWeights:
-    """Weights used in the first, interpretable MVP scoring model.
-
-    The score is deliberately simple: it is not a machine-learning model yet.
-    Every component is normalized inside a single match, so a player is compared
-    with players from the same game, not with players from other fixtures.
-    """
 
     momentum: float = 0.35
     attacking: float = 0.25
@@ -36,11 +30,6 @@ RATE_FEATURES = [
 
 
 def _minmax(series: pd.Series) -> pd.Series:
-    """Normalize a feature to 0-1 inside one match.
-
-    If all players have the same value, the feature cannot separate players, so
-    everyone gets 0 for this feature instead of dividing by zero.
-    """
 
     series = series.fillna(0).astype(float)
     min_value = series.min()
