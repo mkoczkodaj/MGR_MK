@@ -6,3 +6,4 @@ Notebooki zostają jako warstwa eksploracyjna projektu.
 - `main.ipynb` - dotychczasowa analiza w formie notebooka.
 - `00_glowny_notebook.ipynb` - główne miejsce pracy z wykresami dla wybranego meczu.
 - `01_dataset_wszyscy_zawodnicy.ipynb` - budowa datasetu zawodnik-mecz dla wszystkich meczów.
+- `02_ml_mvp_iteracja.ipynb` - pierwsza iteracja ML/PCA dla rankingu MVP.

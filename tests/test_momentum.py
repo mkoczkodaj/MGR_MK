@@ -13,6 +13,17 @@ from mgr_mk.momentum import (
     player_momentum_by_window,
     player_momentum_contributions,
 )
+from mgr_mk.mvp import (
+    add_player_momentum_to_dataset,
+    score_mvp_candidates,
+    select_match_mvps,
+)
+from mgr_mk.ml import (
+    apply_pca_impact_model,
+    compare_manual_and_ml_mvps,
+    fit_pca_impact_model,
+    select_ml_mvps,
+)
 
 
 def test_brazil_belgium_detects_all_goals():
@@ -52,3 +63,36 @@ def test_player_momentum_contributions_are_available():
     assert not player_totals.empty
     assert not player_windows.empty
     assert {"player.name", "player_momentum"}.issubset(player_totals.columns)
+
+
+def test_mvp_candidates_can_be_ranked_for_match():
+    matches = load_world_cup_2018_matches()
+    dataset = build_player_match_dataset(matches, match_ids=[8650])
+    dataset = add_player_momentum_to_dataset(dataset, matches)
+
+    scored = score_mvp_candidates(dataset)
+    mvps = select_match_mvps(scored)
+
+    assert not scored.empty
+    assert not mvps.empty
+    assert scored["mvp_score"].notna().all()
+    assert mvps["match_id"].tolist() == [8650]
+    assert mvps["is_mvp_eligible"].all()
+
+
+def test_pca_ml_mvp_iteration_runs_for_match():
+    matches = load_world_cup_2018_matches()
+    dataset = build_player_match_dataset(matches, match_ids=[8650])
+    dataset = add_player_momentum_to_dataset(dataset, matches)
+    scored = score_mvp_candidates(dataset)
+    manual_mvps = select_match_mvps(scored)
+
+    model = fit_pca_impact_model(scored)
+    ml_candidates = apply_pca_impact_model(scored, model)
+    ml_mvps = select_ml_mvps(ml_candidates)
+    comparison = compare_manual_and_ml_mvps(manual_mvps, ml_mvps)
+
+    assert not ml_candidates.empty
+    assert not ml_mvps.empty
+    assert ml_candidates["ml_pca_score"].between(0, 1).all()
+    assert comparison["match_id"].tolist() == [8650]

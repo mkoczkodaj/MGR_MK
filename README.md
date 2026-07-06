@@ -17,6 +17,8 @@ MGR_MK/
 - `src/mgr_mk/features.py` - cechy zawodników per 90 minut.
 - `src/mgr_mk/datasets.py` - dataset zawodnik-mecz dla całego turnieju.
 - `src/mgr_mk/momentum.py` - wskaźnik match momentum.
+- `src/mgr_mk/mvp.py` - ranking kandydatów MVP na podstawie cech zawodnika, momentum i kontekstu meczu.
+- `src/mgr_mk/ml.py` - pierwsza iteracja ML/PCA do porównania rankingów MVP.
 - `src/mgr_mk/plots.py` - wykresy momentum i skumulowanego xG.
 
 ## Momentum
