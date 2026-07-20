@@ -4,10 +4,10 @@ Projekt magisterski: analiza danych sportowych na podstawie StatsBomb Open Data 
 
 ```text
 MGR_MK/
-├─ notebooks/          # notebooki eksploracyjne
+├─ notebooks/          # notebooki z kolejnymi etapami analizy
 ├─ src/mgr_mk/         # funkcje używane w analizie
 ├─ tests/              # proste testy kontrolne
-├─ outputs/            # wygenerowane wykresy i tabele
+├─ outputs/            # lokalnie wygenerowane wykresy i tabele
 └─ open-data-master/   # dane StatsBomb Open Data
 ```
 
@@ -42,13 +42,22 @@ Wykres słupkowy pokazuje różnicę momentum w oknach 5-minutowych, a wykres li
 pip install -r requirements.txt
 ```
 
-Głównym miejscem pracy jest notebook:
+Notebooki dodają `src/` do ścieżki Pythona, więc można je uruchamiać bez instalowania projektu jako pakietu.
+
+Sugerowana kolejność pracy:
+
+1. `notebooks/00_glowny_notebook.ipynb` - analiza pojedynczego meczu, momentum, gole, xG i podstawowy ranking MVP.
+2. `notebooks/01_dataset_wszyscy_zawodnicy.ipynb` - budowa datasetu zawodnik-mecz dla całego turnieju.
+3. `notebooks/02_ml_mvp_iteracja.ipynb` - pierwsza iteracja ML/PCA i porównanie z ręcznym rankingiem MVP.
+4. `notebooks/03_budowanie_akcji_ofensywnych.ipynb` - sekwencje ofensywne, xG chain, xG buildup i MVP z komponentem budowania akcji.
+
+Głównym miejscem startu jest notebook:
 
 ```text
 notebooks/00_glowny_notebook.ipynb
 ```
 
-Ten notebook sam dodaje `src/` do ścieżki Pythona, więc można go uruchamiać bez instalowania projektu jako pakietu. Pozostałe notebooki w katalogu `notebooks/` są starszą/eksploracyjną wersją analizy.
+Notebooki `main.ipynb` i `cleaning.ipynb` mają charakter starszy/eksploracyjny.
 
 Dataset dla wszystkich meczów i zawodników generuje notebook:
 
