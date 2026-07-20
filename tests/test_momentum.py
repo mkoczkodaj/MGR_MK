@@ -13,6 +13,10 @@ from mgr_mk.momentum import (
     player_momentum_by_window,
     player_momentum_contributions,
 )
+from mgr_mk.offensive_actions import (
+    build_offensive_sequences,
+    build_player_offensive_features,
+)
 from mgr_mk.mvp import (
     add_player_momentum_to_dataset,
     score_mvp_candidates,
@@ -48,6 +52,33 @@ def test_player_match_dataset_contains_match_context():
     assert {"opponent", "result", "team_momentum", "team_xg"}.issubset(dataset.columns)
     assert dataset["opponent"].notna().all()
     assert dataset["result"].isin(["win", "draw", "loss"]).all()
+    assert {
+        "progressive_actions_per90",
+        "final_third_entries_per90",
+        "box_entries_per90",
+        "xg_chain_per90",
+        "xg_buildup_per90",
+    }.issubset(dataset.columns)
+
+
+def test_offensive_action_features_are_available():
+    match_id = 8650
+    events = load_events(match_id)
+
+    sequences = build_offensive_sequences(events, match_id)
+    player_features = build_player_offensive_features(events, match_id)
+
+    assert not sequences.empty
+    assert not player_features.empty
+    assert {"sequence_xg", "ends_with_shot"}.issubset(sequences.columns)
+    assert {
+        "progressive_actions",
+        "final_third_entries",
+        "box_entries",
+        "xg_chain",
+        "xg_buildup",
+    }.issubset(player_features.columns)
+    assert player_features["progressive_actions"].sum() > 0
 
 
 def test_player_momentum_contributions_are_available():

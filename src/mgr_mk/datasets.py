@@ -3,6 +3,7 @@ import pandas as pd
 from .data_loader import load_events, team_name
 from .features import build_player_match_features
 from .momentum import build_match_momentum, cumulative_xg
+from .offensive_actions import build_player_offensive_features
 
 
 def _dict_name(value):
@@ -90,7 +91,48 @@ def build_player_match_dataset(
         match_id = int(match_info["match_id"])
         events = load_events(match_id)
         player_features = build_player_match_features(events, match_id)
+        offensive_features = build_player_offensive_features(events, match_id)
         team_metrics = _team_match_metrics(events, match_info, window=window)
+
+        player_features = player_features.merge(
+            offensive_features,
+            on=["match_id", "player.id", "player.name", "team.name"],
+            how="left",
+        )
+        offensive_columns = [
+            "offensive_sequence_involvements",
+            "shot_ending_sequence_involvements",
+            "progressive_passes",
+            "progressive_carries",
+            "final_third_entries",
+            "box_entries",
+            "passes_into_box",
+            "carries_into_box",
+            "shot_assists",
+            "xg_chain",
+            "xg_buildup",
+            "offensive_sequences_xg",
+            "progressive_actions",
+        ]
+        player_features[offensive_columns] = player_features[offensive_columns].fillna(0)
+        offensive_per90_columns = [
+            "offensive_sequence_involvements",
+            "shot_ending_sequence_involvements",
+            "progressive_passes",
+            "progressive_carries",
+            "final_third_entries",
+            "box_entries",
+            "passes_into_box",
+            "carries_into_box",
+            "shot_assists",
+            "xg_chain",
+            "xg_buildup",
+            "progressive_actions",
+        ]
+        for column in offensive_per90_columns:
+            player_features[f"{column}_per90"] = (
+                player_features[column] / player_features["minutes_played"] * 90
+            )
 
         player_features = player_features.merge(team_metrics, on="team.name", how="left")
         player_features["match_date"] = match_info["match_date"]
@@ -139,6 +181,31 @@ def build_player_match_dataset(
         "total_xg_per90",
         "pass_accuracy",
         "events_per90",
+        "offensive_sequence_involvements",
+        "shot_ending_sequence_involvements",
+        "progressive_passes",
+        "progressive_carries",
+        "final_third_entries",
+        "box_entries",
+        "passes_into_box",
+        "carries_into_box",
+        "shot_assists",
+        "xg_chain",
+        "xg_buildup",
+        "offensive_sequences_xg",
+        "progressive_actions",
+        "offensive_sequence_involvements_per90",
+        "shot_ending_sequence_involvements_per90",
+        "progressive_passes_per90",
+        "progressive_carries_per90",
+        "final_third_entries_per90",
+        "box_entries_per90",
+        "passes_into_box_per90",
+        "carries_into_box_per90",
+        "shot_assists_per90",
+        "xg_chain_per90",
+        "xg_buildup_per90",
+        "progressive_actions_per90",
         "team_momentum",
         "opponent_momentum",
         "team_xg",

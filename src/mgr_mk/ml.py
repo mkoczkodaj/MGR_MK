@@ -14,6 +14,7 @@ import pandas as pd
 DEFAULT_ML_FEATURES = [
     "norm_player_momentum",
     "attacking_component",
+    "offensive_building_component",
     "involvement_component",
     "defending_component",
     "result_score",

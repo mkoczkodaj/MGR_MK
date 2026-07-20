@@ -10,10 +10,11 @@ from .momentum import build_match_momentum, player_momentum_contributions
 @dataclass(frozen=True)
 class MVPWeights:
 
-    momentum: float = 0.35
-    attacking: float = 0.25
-    involvement: float = 0.20
-    defending: float = 0.15
+    momentum: float = 0.30
+    attacking: float = 0.20
+    offensive_building: float = 0.20
+    involvement: float = 0.15
+    defending: float = 0.10
     result: float = 0.05
 
 
@@ -26,6 +27,12 @@ RATE_FEATURES = [
     "interceptions_per90",
     "passes_per90",
     "events_per90",
+    "progressive_actions_per90",
+    "final_third_entries_per90",
+    "box_entries_per90",
+    "shot_ending_sequence_involvements_per90",
+    "xg_chain_per90",
+    "xg_buildup_per90",
 ]
 
 
@@ -128,6 +135,9 @@ def score_mvp_candidates(
         scored["player_momentum"] = 0.0
     if "momentum_events" not in scored.columns:
         scored["momentum_events"] = 0
+    for feature in RATE_FEATURES:
+        if feature not in scored.columns:
+            scored[feature] = 0.0
 
     scored["minutes_played"] = scored["minutes_played"].fillna(0).astype(float)
     scored["minute_factor"] = (
@@ -160,6 +170,22 @@ def score_mvp_candidates(
         )
         match_rows["norm_passes"] = _minmax(match_rows["passes_per90_minute_adjusted"])
         match_rows["norm_events"] = _minmax(match_rows["events_per90_minute_adjusted"])
+        match_rows["norm_progressive_actions"] = _minmax(
+            match_rows["progressive_actions_per90_minute_adjusted"]
+        )
+        match_rows["norm_final_third_entries"] = _minmax(
+            match_rows["final_third_entries_per90_minute_adjusted"]
+        )
+        match_rows["norm_box_entries"] = _minmax(
+            match_rows["box_entries_per90_minute_adjusted"]
+        )
+        match_rows["norm_shot_sequence_involvement"] = _minmax(
+            match_rows["shot_ending_sequence_involvements_per90_minute_adjusted"]
+        )
+        match_rows["norm_xg_chain"] = _minmax(match_rows["xg_chain_per90_minute_adjusted"])
+        match_rows["norm_xg_buildup"] = _minmax(
+            match_rows["xg_buildup_per90_minute_adjusted"]
+        )
         match_rows["norm_pressures"] = _minmax(
             match_rows["pressures_per90_minute_adjusted"]
         )
@@ -173,6 +199,16 @@ def score_mvp_candidates(
         match_rows["attacking_component"] = match_rows[
             ["norm_total_xg", "norm_shots", "norm_carries"]
         ].mean(axis=1)
+        match_rows["offensive_building_component"] = match_rows[
+            [
+                "norm_progressive_actions",
+                "norm_final_third_entries",
+                "norm_box_entries",
+                "norm_shot_sequence_involvement",
+                "norm_xg_chain",
+                "norm_xg_buildup",
+            ]
+        ].mean(axis=1)
         match_rows["involvement_component"] = match_rows[
             ["norm_passes", "norm_events", "pass_accuracy_adjusted"]
         ].mean(axis=1)
@@ -183,6 +219,7 @@ def score_mvp_candidates(
         match_rows["mvp_score"] = (
             weights.momentum * match_rows["norm_player_momentum"]
             + weights.attacking * match_rows["attacking_component"]
+            + weights.offensive_building * match_rows["offensive_building_component"]
             + weights.involvement * match_rows["involvement_component"]
             + weights.defending * match_rows["defending_component"]
             + weights.result * match_rows["result_score"]
