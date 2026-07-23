@@ -1,5 +1,10 @@
 Projekt magisterski: analiza danych sportowych na podstawie StatsBomb Open Data z Mundialu 2018.
 
+Projekt tworzy autorski ranking MVP zawodników w meczach Mundialu 2018. Ranking
+nie odtwarza oficjalnego głosowania Man of the Match, tylko porządkuje
+zawodników według interpretowalnych cech eventowych: momentum, xG, aktywności,
+defensywy oraz udziału w budowaniu akcji ofensywnych.
+
 ## Struktura projektu
 
 ```text
@@ -35,6 +40,17 @@ Momentum jest autorskim wskaźnikiem opartym na wagach zdarzeń StatsBomb:
 - odzysk piłki: `0.15`.
 
 Wykres słupkowy pokazuje różnicę momentum w oknach 5-minutowych, a wykres liniowy pokazuje skumulowane momentum obu drużyn.
+
+## Ranking MVP
+
+Końcowy wynik MVP składa się z kilku komponentów:
+
+- momentum zawodnika,
+- ataku, czyli m.in. strzałów, xG i prowadzeń piłki,
+- budowania akcji ofensywnych, czyli progresywnych akcji, wejść w ostatnią tercję, wejść w pole karne, xG chain i xG buildup,
+- ogólnego zaangażowania w grę,
+- defensywy,
+- małego bonusu za wynik meczu.
 
 ## Uruchomienie
 
